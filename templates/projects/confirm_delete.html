@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Project — PromptCraft AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto;">
+    <div class="card" style="padding: 32px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 16px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">Delete Application?</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 24px;">
+            Are you sure you want to delete <strong>"{{ project.title }}"</strong>? This action will permanently remove all generated source files, iterations, and database records. This cannot be undone.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <a href="{% url 'dashboard:index' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-can"></i> Permanently Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

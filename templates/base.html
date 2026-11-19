@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PromptCraft AI — Application Generator{% endblock %}</title>
+
+    <!-- FontAwesome 6 Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Base Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+    {% block header %}
+        {% include 'includes/navbar.html' %}
+    {% endblock %}
+
+    {% include 'includes/messages.html' %}
+
+    <main class="{% block main_class %}main-content{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+        {% include 'includes/footer.html' %}
+    {% endblock %}
+
+    <!-- Core JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

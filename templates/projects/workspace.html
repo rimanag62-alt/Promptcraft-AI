@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.title }} — PromptCraft Studio{% endblock %}
+
+{% block body_class %}workspace-body{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/workspace.css' %}">
+{% endblock %}
+
+{% block header %}
+<!-- Studio Custom Header -->
+<header class="workspace-header">
+    <div class="ws-header-left">
+        <a href="{% url 'dashboard:index' %}" class="ws-back-link">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+        <div class="ws-title-group">
+            <h2 class="ws-project-title" title="{{ project.title }}">{{ project.title }}</h2>
+            <span class="ws-version-badge">v{{ project.version }}</span>
+            <span style="font-size: 0.75rem; background: #334155; color: #94a3b8; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
+                {{ project.category }}
+            </span>
+        </div>
+    </div>
+
+    <div class="ws-header-actions">
+        <button id="btn-toggle-history" class="btn btn-secondary btn-sm" title="View Version & Prompt History">
+            <i class="fa-solid fa-clock-rotate-left"></i> History ({{ iterations.count }})
+        </button>
+
+        <a href="{% url 'projects:download_zip' project.id %}" class="btn btn-primary btn-sm" title="Download all project files as ZIP">
+            <i class="fa-solid fa-file-zipper"></i> Download ZIP
+        </a>
+
+        <a href="{% url 'projects:delete' project.id %}" class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #334155;" title="Delete Project">
+            <i class="fa-solid fa-trash-can"></i>
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<div id="workspace-app" 
+     data-project-id="{{ project.id }}" 
+     data-preview-url="{% url 'projects:preview' project.id %}" 
+     class="studio-container">
+
+    <!-- 1. FILE EXPLORER PANE -->
+    <aside class="pane-explorer">
+        <div class="pane-header">
+            <span><i class="fa-regular fa-folder-open"></i> Project Files</span>
+            <span style="background: #334155; color: #e2e8f0; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem;">{{ files.count }}</span>
+        </div>
+
+        <div class="file-tree-container">
+            <ul class="tree-list">
+                {% for file in files %}
+                <li class="tree-item">
+                    <div class="tree-node file {% if file.relative_path == active_file.relative_path %}active{% endif %}" 
+                         data-path="{{ file.relative_path }}">
+                        {% if file.file_type == 'html' %}
+                            <i class="fa-brands fa-html5 icon-html"></i>
+                        {% elif file.file_type == 'css' %}
+                            <i class="fa-brands fa-css3-alt icon-css"></i>
+                        {% elif file.file_type == 'javascript' or file.file_type == 'js' %}
+                            <i class="fa-brands fa-js icon-js"></i>
+                        {% elif file.file_type == 'json' %}
+                            <i class="fa-solid fa-code icon-json"></i>
+                        {% elif file.file_type == 'markdown' %}
+                            <i class="fa-regular fa-file-lines icon-markdown"></i>
+                        {% else %}
+                            <i class="fa-regular fa-file" style="color: #94a3b8;"></i>
+                        {% endif %}
+                        <span style="font-family: var(--font-mono); font-size: 0.85rem;">{{ file.relative_path }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+
+    <!-- 2. SOURCE CODE VIEWER PANE -->
+    <section class="pane-code">
+        <div class="pane-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-code"></i>
+                <span id="current-file-name" style="font-family: var(--font-mono); color: #ffffff;">{{ active_file.relative_path|default:"index.html" }}</span>
+                <span id="current-file-size" style="font-size: 0.75rem; color: #94a3b8; font-weight: 400;">
+                    {% if active_file %}{{ active_file.file_size }} B{% endif %}
+                </span>
+            </div>
+            <div class="code-header-actions">
+                <button id="btn-copy-code" class="btn-icon-sm" title="Copy code to clipboard">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="code-editor-wrapper">
+            <pre class="code-content"><code id="code-content">{{ active_file.content|default:"Select a file to inspect its source code." }}</code></pre>
+        </div>
+    </section>
+
+    <!-- 3. LIVE SANDBOXED PREVIEW PANE -->
+    <section class="pane-preview">
+        <div class="preview-toolbar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle" style="font-size: 0.55rem;"></i> Live Sandbox Preview
+                </span>
+            </div>
+
+            <div class="device-selectors">
+                <button class="device-btn active" data-device="desktop" title="Desktop View (100%)">
+                    <i class="fa-solid fa-desktop"></i>
+                </button>
+                <button class="device-btn" data-device="tablet" title="Tablet View (768px)">
+                    <i class="fa-solid fa-tablet-screen-button"></i>
+                </button>
+                <button class="device-btn" data-device="mobile" title="Mobile View (375px)">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </button>
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+                <button id="btn-reload-preview" class="btn-icon-sm" title="Reload Preview Frame">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <a href="{% url 'projects:preview' project.id %}" target="_blank" class="btn-icon-sm" title="Open Preview in New Tab">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="preview-viewport-wrapper">
+            <div id="preview-container" class="preview-frame-container desktop">
+                <iframe id="preview-iframe"
+                        src="{% url 'projects:preview' project.id %}"
+                        class="preview-iframe"
+                        sandbox="allow-scripts allow-forms allow-modals allow-same-origin"
+                        title="Live Application Preview">
+                </iframe>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Bottom Prompt Iteration Bar -->
+<div class="iteration-bar">
+    <div style="display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 0.9rem; font-weight: 600; white-space: nowrap;">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color: #818cf8;"></i>
+        <span>Modify App:</span>
+    </div>
+
+    <form id="iteration-form" class="iteration-form">
+        {% csrf_token %}
+        <input type="text" 
+               id="iteration-input" 
+               name="prompt" 
+               class="iteration-input" 
+               placeholder="Enter a prompt to modify this app (e.g. 'Add a dark mode toggle', 'Add export to Excel', 'Add search filter')..." 
+               required>
+        <button type="submit" id="btn-submit-iteration" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Update App
+        </button>
+    </form>
+</div>
+
+<!-- History Drawer Modal -->
+<div id="history-drawer" class="history-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+        <h4 style="font-size: 0.92rem; font-weight: 700; color: #ffffff;"><i class="fa-solid fa-clock-rotate-left"></i> Version History</h4>
+    </div>
+    {% for iter in iterations %}
+    <div class="history-item-card">
+        <div class="history-item-header">
+            <span><strong>Iteration #{{ iter.iteration_number }}</strong></span>
+            <span>{{ iter.created_at|date:"M d, H:i" }}</span>
+        </div>
+        <p class="history-item-prompt">"{{ iter.prompt }}"</p>
+        {% if iter.summary_of_changes %}
+            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">{{ iter.summary_of_changes }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block footer %}
+<!-- Studio hides standard footer to maximize viewport -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/workspace.js' %}"></script>
+{% endblock %}

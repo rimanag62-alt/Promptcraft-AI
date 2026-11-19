@@ -1,0 +1,47 @@
+<header class="site-header">
+    <div class="header-container">
+        <a href="{% if user.is_authenticated %}{% url 'dashboard:index' %}{% else %}{% url 'dashboard:home' %}{% endif %}" class="brand-link">
+            <div class="brand-icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+                <span class="brand-name">PromptCraft AI</span>
+                <span class="brand-tag">SSR</span>
+            </div>
+        </a>
+
+        <nav>
+            <ul class="nav-links">
+                {% if user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'dashboard:index' %}" class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
+                            <i class="fa-solid fa-table-cells-large"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'generator:new' %}" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-plus"></i> New Application
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:profile' %}" class="user-badge" title="User Profile">
+                            <i class="fa-solid fa-circle-user"></i> {{ user.username }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:logout' %}" class="btn btn-outline btn-sm" title="Sign Out">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url 'accounts:login' %}" class="nav-link">Sign In</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-sm">Get Started</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>

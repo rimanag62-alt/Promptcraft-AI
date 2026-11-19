@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile — PromptCraft AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 30px auto;">
+    <div class="card" style="padding: 32px;">
+        <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 24px;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2rem;">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">{{ user.username }}</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">{{ user.email|default:"No email registered" }}</p>
+                <span class="brand-tag" style="margin-left: 0; margin-top: 6px; display: inline-block;">Member since {{ user.date_joined|date:"M Y" }}</span>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Generation Statistics</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: var(--bg-muted); padding: 18px; border-radius: var(--radius-md);">
+                <span style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Total Projects Created</span>
+                <div style="font-size: 2rem; font-weight: 800; color: var(--primary); margin-top: 4px;">{{ total_projects }}</div>
+            </div>
+            <div style="background: var(--bg-muted); padding: 18px; border-radius: var(--radius-md);">
+                <span style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Completed Applications</span>
+                <div style="font-size: 2rem; font-weight: 800; color: var(--success); margin-top: 4px;">{{ completed_projects }}</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'dashboard:index' %}" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
